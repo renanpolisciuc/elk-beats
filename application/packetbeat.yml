@@ -1,0 +1,27 @@
+packetbeat.interfaces.type: pcap
+packetbeat.interfaces.device: any
+packetbeat.protocols:
+- type: http
+  ports: [80]
+output.elasticsearch:
+  hosts: ["http://el:9200"]
+setup.dashboards.enabled: true
+setup.dashboards.retry.enabled: true
+setup.dashboards.retry.interval: 5
+setup.dashboards.retry.maximum: 0
+processors:
+  - add_tags:
+      tags: [web, poc]
+      target: "environment"
+  - add_fields:
+      target: project
+      fields:
+        name: my-poc
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/packetbeat
+  name: packetbeat
+  keepfiles: 7
+  permissions: 0644
+setup.kibana.host: "kibana:5601"

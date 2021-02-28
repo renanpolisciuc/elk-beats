@@ -1,0 +1,62 @@
+filebeat.inputs:
+- type: log
+  paths:
+    - /var/log/nginx/*.log
+    - /var/log/metricbeat/*
+    - /var/log/heartbeat/*
+    - /var/log/packetbeat/*
+    - /var/log/filebeat/*
+    
+filebeat.modules:
+- module: nginx
+  # Access logs
+  access:
+    enabled: true
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    var.paths: ["/var/log/nginx/access.log*"]
+
+  # Error logs
+  error:
+    enabled: true
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    var.paths: ["/var/log/nginx/error.log*"]
+
+  # Ingress-nginx controller logs. This is disabled by default. It could be used in Kubernetes environments to parse ingress-nginx logs
+  ingress_controller:
+    enabled: false
+
+    # Set custom paths for the log files. If left empty,
+    # Filebeat will choose the paths depending on your OS.
+    #var.paths:
+
+setup.dashboards.enabled: true
+setup.dashboards.retry.enabled: true
+setup.dashboards.retry.interval: 5
+setup.dashboards.retry.maximum: 0
+
+setup.kibana.host: "kibana:5601"
+
+processors:
+  - add_tags:
+      tags: [web, poc]
+      target: "environment"
+  - add_fields:
+      target: project
+      fields:
+        name: my-poc
+      
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["el:9200"]
+
+logging.level: debug
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
